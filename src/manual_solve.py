@@ -10,15 +10,39 @@ import re
 ### result. Name them according to the task ID as in the three
 ### examples below. Delete the three examples. The tasks you choose
 ### must be in the data/training directory, not data/evaluation.
-def solve_6a1e5592(x):
+def solve_7fe24cdd(x):
+    top_left = x
+    bottom_left = np.array(list(reversed(list(zip(*top_left)))))
+    bottom_right = np.array(list(reversed(list(zip(*bottom_left)))))
+    top_right = np.array(list(reversed(list(zip(*bottom_right)))))
+    left_side = np.vstack((top_left, bottom_left))
+    right_side = np.vstack((top_right, bottom_right))
+    x = np.hstack((left_side, right_side))
     return x
 
-def solve_b2862040(x):
+def solve_08ed6ac7(x):
+    color_numbers = [1,2,3,4]
+
+    len_dict = {}
+
+    for idx in range(len(x)):
+        len_dict[idx] = np.count_nonzero(x[:, idx])
+
+    for color_number in color_numbers:
+        max_idx = max(len_dict, key=len_dict.get)
+        max_col = x[:, max_idx]
+        max_col[np.nonzero(max_col)] = color_number
+        x[:, max_idx] = max_col
+        len_dict.pop(max_idx)
+
     return x
 
-def solve_05269061(x):
+def solve_6f8cd79b(x):
+    x[:,0] = 8
+    x[:,-1] = 8
+    x[0,:] = 8
+    x[-1,:] = 8
     return x
-
 
 def main():
     # Find all the functions defined in this file whose names are

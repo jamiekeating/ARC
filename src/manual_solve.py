@@ -37,11 +37,46 @@ def solve_08ed6ac7(x):
 
     return x
 
-def solve_6f8cd79b(x):
-    x[:,0] = 8
-    x[:,-1] = 8
-    x[0,:] = 8
-    x[-1,:] = 8
+def solve_d687bc17(x):
+    left = list(x[:,0])
+    right = list(x[:,-1])
+    top = list(x[0,:])
+    bottom = list(x[-1,:])
+
+    left_color = max(left, key=left.count)
+    rows, cols = np.where(x[:,1:]==left_color)
+    for i in range(len(rows)):
+        x[rows[i], 1] = left_color
+        x[rows[i], cols[i]+1] = 0
+
+    right_color = max(right, key=right.count)
+    rows, cols = np.where(x[:,:-2]==right_color)
+    for i in range(len(rows)):
+        x[rows[i], -2] = right_color
+        x[rows[i], cols[i]] = 0
+
+    top_color = max(top, key=top.count)
+    rows, cols = np.where(x[1:,:]==top_color)
+    for i in range(len(rows)):
+        x[1, cols[i]] = top_color
+        x[rows[i]+1, cols[i]] = 0
+
+    bottom_color = max(bottom, key=bottom.count)
+    rows, cols = np.where(x[:-2,:]==bottom_color)
+    for i in range(len(rows)):
+        x[-2, cols[i]] = bottom_color
+        x[rows[i], cols[i]] = 0
+
+    all_colors = list(np.unique(x))
+
+    for used_colors in [0, left_color, right_color, top_color, bottom_color]:
+        all_colors.remove(used_colors)
+
+    for unused_colors in all_colors:
+        rows, cols = np.where(x==unused_colors)
+        for i in range(len(rows)):
+            x[rows[i], cols[i]] = 0
+
     return x
 
 def main():

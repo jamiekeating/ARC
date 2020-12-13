@@ -1,54 +1,125 @@
 #!/usr/bin/python
 
+### Name: Jamie Keating
+### Student Number: 20235761
+### Date: 14th December 2020
+### GitHub Repo: https://github.com/jamiekeating/ARC
+
 import os, sys
 import json
 import numpy as np
 import re
 
-### YOUR CODE HERE: write at least three functions which solve
-### specific tasks by transforming the input x and returning the
-### result. Name them according to the task ID as in the three
-### examples below. Delete the three examples. The tasks you choose
-### must be in the data/training directory, not data/evaluation.
+### Code to manually solve three problems from the ARC challenge.
+
 def solve_7fe24cdd(x):
+    # The output grid is composed of four copies of the input grid. Based on
+    # the examples given, the input is always a square grid with dimensions
+    # n x n and the output is always a square grid with dimensions 2n x 2n. The
+    # top left quadrant of the output grid is the input grid. The top right
+    # quadrant is the input grid rotated by 90 degrees clockwise. The bottom
+    # right quadrant is the input grid rotated by 180 degrees clockwise. And
+    # the bottom left quadrant is the input grid rotated by 90 degrees anti-clockwise.
+    # All training/test grids solved correctly.
+    
+    # Top left quadrant is the input grid (x).
     top_left = x
+    # Rotate top left grid by 90 degrees anti-clockwise by reversing the order of
+    # the list elements to get the bottom left quadrant.
     bottom_left = np.array(list(reversed(list(zip(*top_left)))))
+    # Rotate bottom left grid by 90 degrees anti-clockwise by reversing the order
+    # of the list elements to get the bottom right quadrant.
     bottom_right = np.array(list(reversed(list(zip(*bottom_left)))))
+    # Rotate bottom right grid by 90 degrees anti-clockwise by reversing the order
+    # of the list elements to get the top right quadrant.
     top_right = np.array(list(reversed(list(zip(*bottom_right)))))
+    # Vertically stack top left and bottom left quadrants to create the left side
+    # of the output grid.
     left_side = np.vstack((top_left, bottom_left))
+    # Vertically stack top right and bottom right quadrants to create the right
+    # side of the output grid.
     right_side = np.vstack((top_right, bottom_right))
+    # Horizontally stack the left and right sides to create the final output grid. 
     x = np.hstack((left_side, right_side))
+
+    # Return output grid.
     return x
 
 def solve_08ed6ac7(x):
-    color_numbers = [1,2,3,4]
+    # The output grid is the same layout as the input grid, except the grey squares in
+    # each column of the output grid are re-coloured based on the number of grey squares
+    # in the column. For the column with the most grey squares, the grey squares are
+    # coloured blue. For the column with the second most grey squares, the grey squares
+    # are coloured red. For the column with the third most grey squares, the grey squares
+    # are coloured green. For the column with the fewest grey squares, the grey squares
+    # are coloured yellow. Based on the examples, the position and order of the columns
+    # may vary but the output colours are always blue, red, green, and yellow.
+    # All training/test grids solved correctly.
+    
+    # Define a reference list of output colours based on the colour IDs.
+    colour_numbers = [1,2,3,4]
 
+    # Create an empty dictionary to store the number of non-zero (grey) elements for each
+    # column of the input grid.
     len_dict = {}
 
+    # For each column in the grid, count the number of non-zero elements and store the
+    # value in len_dict where the column index is the key.
     for idx in range(len(x)):
         len_dict[idx] = np.count_nonzero(x[:, idx])
 
-    for color_number in color_numbers:
+    # Assign colours to each column containing non-zero elements. The colours in colour_numbers
+    # list are ordered. For each colour ID in colour_numbers, perform the following loop: 
+    for colour_number in colour_numbers:
+        # Get the dictionary value (column index) with the highest number of non-zero elements.
         max_idx = max(len_dict, key=len_dict.get)
+        # Get the column from input grid corresponding to the column index above.
         max_col = x[:, max_idx]
-        max_col[np.nonzero(max_col)] = color_number
+        # Change the non-zero values in the column to the correspoonding colour number.
+        max_col[np.nonzero(max_col)] = colour_number
+        # Update the column in the input grid with the new values.
         x[:, max_idx] = max_col
+        # Remove the column index from len_dict so that in the next loop, the max value
+        # will be different.
         len_dict.pop(max_idx)
 
+    # Return output grid.
     return x
 
 def solve_d687bc17(x):
+    # The example inputs show m x n grids where the border square for each edge is a
+    # different colour. There are also coloured cells scattered across the grid, within
+    # the coloured border. The solution for the challenge is to re-position the scattered
+    # squares where its colour matches one of th the edges. Scattered squares that do not
+    # have a corresponding edge are deleted (coloured black). Where a scattered square is
+    # re-positioned, it is moved to be adjacent to the matching coloured edge. Where the
+    # coloured edge is on the right or left side, the scattered square maintains the same
+    # row index, only the column index is changed. Where the coloured edge is on the top
+    # or bottom, the scattered square maintains the same column index, only the row index
+    # is changed. Based on the examples, the colours of each edge may vary.
+    # All training/test grids solved correctly.
+
+    # Extract the values of the left and right columns and the top and bottom rows of the
+    # grid. These will be used to determine the colours of each edge.
     left = list(x[:,0])
     right = list(x[:,-1])
     top = list(x[0,:])
     bottom = list(x[-1,:])
 
+    # For the left side, count the colour IDs. The colour ID with the highest frequency count
+    # is the deemed to be the colour of the left edge.
     left_color = max(left, key=left.count)
+    # For the rest of the grid (excluding the left edge) search for scattered squares where the
+    # colour matches the left edge.
     rows, cols = np.where(x[:,1:]==left_color)
+    # For each scattered square matching the colour of the left edge, change the colour of
+    # the square adjacent to the left edge on the same row to the same colour. Then change
+    # the colour of the scattered square to black.
     for i in range(len(rows)):
         x[rows[i], 1] = left_color
         x[rows[i], cols[i]+1] = 0
 
+    # Repeat the process for the left side for the right, top and bottom edges.
     right_color = max(right, key=right.count)
     rows, cols = np.where(x[:,:-2]==right_color)
     for i in range(len(rows)):
@@ -67,17 +138,24 @@ def solve_d687bc17(x):
         x[-2, cols[i]] = bottom_color
         x[rows[i], cols[i]] = 0
 
+    # The last step is to remove the scattered squares that do not have matching edges. To do
+    # that, create a list of all colours in the input grid and remove the colours used for the
+    # edges.
     all_colors = list(np.unique(x))
 
     for used_colors in [0, left_color, right_color, top_color, bottom_color]:
         all_colors.remove(used_colors)
 
+    # Scattered squares matching the remaining (unused) colours are changed to black.
     for unused_colors in all_colors:
         rows, cols = np.where(x==unused_colors)
         for i in range(len(rows)):
             x[rows[i], cols[i]] = 0
 
+    # Return output grid.
     return x
+
+### Reflection:
 
 def main():
     # Find all the functions defined in this file whose names are

@@ -108,47 +108,47 @@ def solve_d687bc17(x):
 
     # For the left side, count the colour IDs. The colour ID with the highest frequency count
     # is the deemed to be the colour of the left edge.
-    left_color = max(left, key=left.count)
+    left_colour = max(left, key=left.count)
     # For the rest of the grid (excluding the left edge) search for scattered squares where the
     # colour matches the left edge.
-    rows, cols = np.where(x[:,1:]==left_color)
+    rows, cols = np.where(x[:,1:]==left_colour)
     # For each scattered square matching the colour of the left edge, change the colour of
     # the square adjacent to the left edge on the same row to the same colour. Then change
     # the colour of the scattered square to black.
     for i in range(len(rows)):
-        x[rows[i], 1] = left_color
+        x[rows[i], 1] = left_colour
         x[rows[i], cols[i]+1] = 0
 
     # Repeat the process for the left side for the right, top and bottom edges.
-    right_color = max(right, key=right.count)
-    rows, cols = np.where(x[:,:-2]==right_color)
+    right_colour = max(right, key=right.count)
+    rows, cols = np.where(x[:,:-2]==right_colour)
     for i in range(len(rows)):
-        x[rows[i], -2] = right_color
+        x[rows[i], -2] = right_colour
         x[rows[i], cols[i]] = 0
 
-    top_color = max(top, key=top.count)
-    rows, cols = np.where(x[1:,:]==top_color)
+    top_colour = max(top, key=top.count)
+    rows, cols = np.where(x[1:,:]==top_colour)
     for i in range(len(rows)):
-        x[1, cols[i]] = top_color
+        x[1, cols[i]] = top_colour
         x[rows[i]+1, cols[i]] = 0
 
-    bottom_color = max(bottom, key=bottom.count)
-    rows, cols = np.where(x[:-2,:]==bottom_color)
+    bottom_colour = max(bottom, key=bottom.count)
+    rows, cols = np.where(x[:-2,:]==bottom_colour)
     for i in range(len(rows)):
-        x[-2, cols[i]] = bottom_color
+        x[-2, cols[i]] = bottom_colour
         x[rows[i], cols[i]] = 0
 
     # The last step is to remove the scattered squares that do not have matching edges. To do
     # that, create a list of all colours in the input grid and remove the colours used for the
     # edges.
-    all_colors = list(np.unique(x))
+    all_colours = list(np.unique(x))
 
-    for used_colors in [0, left_color, right_color, top_color, bottom_color]:
-        all_colors.remove(used_colors)
+    for used_colours in [0, left_colour, right_colour, top_colour, bottom_colour]:
+        all_colours.remove(used_colours)
 
     # Scattered squares matching the remaining (unused) colours are changed to black.
-    for unused_colors in all_colors:
-        rows, cols = np.where(x==unused_colors)
+    for unused_colours in all_colours:
+        rows, cols = np.where(x==unused_colours)
         for i in range(len(rows)):
             x[rows[i], cols[i]] = 0
 
@@ -156,6 +156,42 @@ def solve_d687bc17(x):
     return x
 
 ### Reflection:
+#
+# In Chollet's paper, The Measure of Intelligence (https://arxiv.org/abs/1911.01547), he outlines
+# the important differences between benchmarking artificial intelligence for specific tasks and
+# benchmarking for general artificial intelligence. In short, the measure of general intelligence
+# should be the ability to learn skills rather than the performance of the skill itself. Solutions
+# to the tasks in the ARC dataset are so varied that a single narrowly-defined algorithm could not
+# solve all of them, even if it was highly skilled in solving one specific problem type. For some
+# tasks in the ARC dataset, it is difficult to even articulate in a concise manner the exact steps
+# required to solve the task, even if the answer appears obvious.
+#
+# To solve these tasks with hand-coded solutions, I used basic python and some useful functions from
+# Numpy. For the tasks I chose I did not need to use any other libraries. Each of the solutions take
+# advantage of the matrix structure of the input/output grids and the ability to slice matrices into
+# rows and columns using Numpy. In all cases it was important to identify the location and orientation
+# of shapes in the input and output grids. However, this similarity did not simplify the implementation
+# because the exact requirement to recognise shapes and their location was slightly different in each
+# case. While there were some similarities across the solutions, the differences were more apparent.
+# For some tasks it was important to keep track of the size of the shapes in the grid and in others
+# the count of shapes was important. For some tasks the shapes were not important but the repeated
+# patterns were. And in others the relative position of shapes was important. In all cases it was
+# important to understand the entire "situation" to solve the task. Knowing the value of each square
+# in the input and output grids in the test datasets is meaningless without understanding the
+# relationship between all squares. Chollet refers to this as the "situation space". This is reminiscent
+# of the feature hierarchy in deep learning.
+#
+# The tasks in the ARC dataset highlight the layers and nuance of intelligence required to solve even
+# apparently simple tasks. The individual transformations required to solve simple tasks are trivial
+# for a human, but the intelligent orchestration of such tasks is beyond the current state of the art -
+# from Chollet's paper "ARC does not appear to be approachable by any existing machine learning
+# technique (including Deep Learning), due to its focus on broad generalization and few-shot learning".
+# Chollet expects that a solution to the ARC dataset will take the form of a program synthesis engine
+# which will use a domain-specific language capable of expressing all possible solution programs for
+# any ARC task and generate candidate programs and solutions from each. The successful development of
+# a human-level solver would represent the ability to program an AI based on demonstration alone and
+# to do tasks which require human-like intelligence. In the meantime, the ARC dataset and challenge
+# represent a useful testing ground for new approaches to AI.
 
 def main():
     # Find all the functions defined in this file whose names are
